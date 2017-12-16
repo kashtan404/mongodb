@@ -9,6 +9,7 @@ gitlab -> gitlab-runner -> vagrant -> vsphere
 Так же, нужно ввести свои spec_name, template_name и прочее в Vagrantfile
 
 В ci 5 стадий:
+
         1) деплой виртуалок
             - vagrant up
         2) dry-run плейбука
@@ -27,6 +28,7 @@ gitlab -> gitlab-runner -> vagrant -> vsphere
 Переменные можно посмотреть и изменить в group_vars/
 
 Чтобы довести до продакшена:
+
         1) Пересмотреть архитектуру. Скорее всего одного роутера маловато будет.
         2) Добавить vault файл либо хранить логины/пароли/keyfile вне ролей.
         3) Можно генератор inventory вроде [kubespray inventory builder](https://github.com/kubernetes-incubator/kubespray/blob/master/contrib/inventory_builder/inventory.py)
