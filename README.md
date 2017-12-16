@@ -2,6 +2,7 @@
 gitlab -> gitlab-runner -> vagrant -> vsphere
 
 Для работы с текущим ci, необходимо указать в конфигурации ci в gitlab, следующие переменные:
+
 	VCENTER_HOST
 	VCENTER_USER
 	VCENTER_PASS
