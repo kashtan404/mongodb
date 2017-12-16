@@ -1,0 +1,34 @@
+# mongo.conf
+
+systemLog:
+  destination: file
+  path: "/var/log/mongodb/mongod.log"
+  logAppend: true
+
+storage:
+  dbPath: {{ mongodb_datadir }}/mongod
+
+processManagement:
+  fork: true
+  pidFilePath: /var/run/mongodb/mongod.pid
+
+security:
+{% if mongod_auth %}
+  authorization: enabled
+  keyFile: {{ mongodb_datadir }}/keyfile
+{% else %}
+  authorization: disabled
+{% endif %}
+
+net:
+  port: {{ mongod_port }}
+  bindIp: 0.0.0.0
+
+{% if mongod_auth %}
+replication:
+  replSetName: {{ mongod_repset_name }}
+
+sharding:
+  clusterRole: shardsvr
+
+{% endif %}

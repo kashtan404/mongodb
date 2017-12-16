@@ -1,0 +1,11 @@
+rs.initiate()
+sleep(13000)
+{% for node in groups['mongoc_servers'] %}
+{% if node in mongod_repset_arbiters %}
+rs.addArb("{{ node }}:{{ mongoc_port }}")
+{% else %}
+rs.add("{{ node }}:{{ mongoc_port }}")
+{% endif %}
+sleep(8000)
+{% endfor %}
+printjson(rs.status())

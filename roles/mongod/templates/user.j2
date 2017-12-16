@@ -1,0 +1,7 @@
+db.dropUser('root')
+db.createUser({
+      user: "{{ mongo_admin_username }}",
+      pwd: "{{ mongo_admin_pass }}",
+      roles: [ { role: "root", db: "admin" }, 
+               { role: "userAdminAnyDatabase", db: "admin" }]
+  })

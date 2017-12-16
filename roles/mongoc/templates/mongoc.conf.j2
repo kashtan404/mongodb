@@ -1,0 +1,32 @@
+systemLog:
+  destination: file
+  path: "/var/log/mongodb/mongod-config.log"
+  logAppend: true
+
+# fork and run in background
+processManagement:
+  fork: true
+  pidFilePath: /var/run/mongodb/mongoc.pid
+
+net:
+  port: {{ mongoc_port }}
+  bindIp: 0.0.0.0
+
+storage:
+  dbPath: {{ mongodb_datadir }}/configdb
+
+security:
+{% if mongod_auth %}
+  authorization: enabled
+  keyFile: {{ mongodb_datadir }}/keyfile
+{% else %}
+  authorization: disabled
+{% endif %}
+
+{% if mongod_auth %}
+sharding:
+  clusterRole: configsvr
+
+replication:
+  replSetName: mongoc
+{% endif %}

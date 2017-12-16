@@ -1,0 +1,82 @@
+---
+
+- name: create data directory for mongodb
+  file:
+    path: "{{ mongodb_datadir }}/mongod"
+    state: directory
+    owner: mongod
+    group: mongod
+
+- name: Create the mongodb startup file
+  template:
+    src: mongod.service.j2
+    dest: /usr/lib/systemd/system/mongod.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Set auth to false before users added
+  set_fact: 
+    mongod_auth: false
+
+- name: Create the mongodb configuration file
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+
+- name: Copy the keyfile for authentication
+  copy:
+    src: keyfile
+    dest: "{{ mongodb_datadir }}/keyfile"
+    owner: mongod
+    group: mongod
+    mode: 0400
+
+- name: Start the mongodb service
+  systemd:
+    name: mongod
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- wait_for:
+    port: "{{ mongod_port }}"
+    delay: 5
+
+- name: Create the file to initialize mongo user
+  template:
+    src: user.j2
+    dest: /tmp/user.js
+
+- name: Create admin User
+  command: "/usr/bin/mongo --port {{ mongod_port }} admin /tmp/user.js"
+  changed_when: false
+
+- name: set auth to true after users added
+  set_fact: 
+    mongod_auth: true
+
+- name: Create the mongodb configuration file
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+
+- name: Restart the mongodb service
+  service:
+    name: mongod
+    state: restarted
+
+- wait_for:
+    port: "{{ mongod_port }}"
+    delay: 5
+
+- include: init_repset.yml
+  when: inventory_hostname in mongod_repset_masters
+
+- name: Remove tmp files
+  file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  with_items:
+    - repset_init.j2
+    - user.js

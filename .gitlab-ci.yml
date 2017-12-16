@@ -1,0 +1,60 @@
+stages:
+  - deploy_vm
+  - unit-tests
+  - deploy_cluster
+  - test_cluster
+  - manual_cleanup
+
+variables:
+  ANSIBLE_FORCE_COLOR: "true"
+
+.tags_only_vagrant: &tags_only_vagrant
+  tags:
+    - vagrant
+  only:
+    - master
+
+.tags_only_ansible: &tags_only_ansible
+  tags:
+    - ansible
+  only:
+    - master
+
+cache:
+  key: "$CI_PIPELINE_ID"
+  untracked: true
+  paths:
+    - .vagrant/
+
+deploy_test_job:
+  stage: deploy_vm
+  script:
+    - vagrant up
+  <<: *tags_only_vagrant
+
+syntax-check:
+  stage: unit-tests
+  script:
+    - ansible-playbook -i ./hosts ./mongo_cluster.yml -vvv  --syntax-check
+    - ansible-playbook -i ./hosts ./mongo_cluster_test.yml -vvv --syntax-check
+  <<: *tags_only_ansible
+
+deploy_cluster:
+  stage: deploy_cluster
+  script:
+    - ansible-playbook -i ./hosts ./mongo_cluster.yml
+  <<: *tags_only_ansible
+
+test_cluster:
+  stage: test_cluster
+  script:
+    - ansible-playbook -i ./hosts ./mongo_cluster_test.yml
+  when: manual
+  <<: *tags_only_ansible
+
+manual_cleanup_dev:
+  stage: manual_cleanup
+  script:
+    - vagrant destroy -f
+  when: manual
+  <<: *tags_only_vagrant

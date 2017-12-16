@@ -1,0 +1,11 @@
+- name: Copy the test script
+  copy:
+    src: shard_test.js
+    dest: /tmp/shard_test.js
+
+- name: Run test script
+  command: "/usr/bin/mongo localhost:{{ mongos_port }}/admin -u admin -p {{ mongo_admin_pass }} /tmp/shard_test.js"
+  register: shard_test_result
+
+- debug:
+    msg: "{{ shard_test_result.stdout}}"

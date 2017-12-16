@@ -1,0 +1,5 @@
+---
+
+- hosts: mongos_servers
+  roles:
+  - role: shard_test

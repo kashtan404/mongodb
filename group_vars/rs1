@@ -1,0 +1,9 @@
+# Name of replica set
+mongod_repset_name: rs1
+
+# Replica set members
+mongod_repset_servers:
+  - c00test01
+  - c00test02
+  - c00test03
+  - c00test04

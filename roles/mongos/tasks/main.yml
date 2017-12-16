@@ -1,0 +1,39 @@
+---
+
+- name: Create the mongos startup file
+  template:
+    src: mongos.service.j2
+    dest: /usr/lib/systemd/system/mongos.service
+    mode: 0655
+
+- name: Create the mongos configuration file
+  template:
+    src: mongos.conf.j2
+    dest: /etc/mongos.conf
+
+- name: Copy the keyfile for authentication
+  copy:
+    src: roles/mongod/files/keyfile
+    dest: "{{ mongodb_datadir }}/keyfile"
+    owner: mongod
+    group: mongod
+    mode: 0400
+
+- name: Start the mongodb service
+  systemd:
+    name: mongos
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- wait_for:
+    port: "{{ mongos_port }}"
+    delay: 3
+
+- name: Copy the file enable  sharding
+  template:
+    src: mongos_init.js.j2
+    dest: /tmp/mongos_init.js
+
+- name: Create sharding
+  command: "/usr/bin/mongo localhost:{{ mongos_port }}/admin -u {{ mongo_admin_username }} -p {{ mongo_admin_pass }} /tmp/mongos_init.js"

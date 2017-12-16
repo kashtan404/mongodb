@@ -1,0 +1,49 @@
+---
+
+- name: Install epel-repo
+  yum:
+    name: epel-release
+    state: present
+
+- name: Disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Disable selinux
+  selinux:
+    state: disabled
+
+- name: Add mongodb repo
+  copy:
+    src: mongodb.repo
+    dest: /etc/yum.repos.d/mongodb.repo
+    mode: 0644
+
+- name: Install the mongodb package
+  yum:
+    name: "mongodb-org-{{ mongodb_version }}"
+    state: present
+
+- name: Install pymongo
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-pymongo
+    - policycoreutils-python
+
+- name: Create the data directory for the namenode metadata
+  file:
+    path: "{{ mongodb_datadir }}"
+    owner: mongod
+    group: mongod
+    state: directory
+    recurse: true
+
+- name: Modify hostfile
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+  when: create_hosts_file

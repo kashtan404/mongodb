@@ -1,0 +1,80 @@
+---
+
+- name: Create data directory for mongoc configuration server
+  file:
+    path: "{{ mongodb_datadir }}/configdb"
+    state: directory
+    owner: mongod
+    group: mongod
+
+- name: Create the mongodb startup file
+  template:
+    src: mongoc.service
+    dest: /usr/lib/systemd/system/mongoc.service
+    mode: 0644
+
+- name: Set auth to false before users added
+  set_fact: 
+    mongod_auth: false
+
+- name: Create the mongodb configuration file
+  template:
+    src: mongoc.conf.j2
+    dest: /etc/mongoc.conf
+
+- name: Copy the keyfile for authentication
+  copy:
+    src: roles/mongod/files/keyfile
+    dest: "{{ mongodb_datadir }}/keyfile"
+    owner: mongod
+    group: mongod
+    mode: 0400
+
+- name: Start the mongodb service
+  systemd:
+    name: mongoc
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- wait_for:
+    port: "{{ mongoc_port }}"
+    delay: 3
+
+- name: Create the file to initialize mongo user
+  template:
+    src: user.j2
+    dest: /tmp/user.js
+
+- name: Create admin User
+  command: "/usr/bin/mongo --port {{ mongoc_port }} admin /tmp/user.js"
+  changed_when: false
+
+- name: set auth to true after users added
+  set_fact: 
+    mongod_auth: true
+
+- name: Create the mongodb configuration file
+  template:
+    src: mongoc.conf.j2
+    dest: /etc/mongoc.conf
+
+- name: Restart the mongodb service
+  service:
+    name: mongoc
+    state: restarted
+
+- wait_for:
+    port: "{{ mongoc_port }}"
+    delay: 5
+
+- name: Create the file to initialize mongoc
+  template:
+    src: mongoc_init.js.j2
+    dest: /tmp/mongoc_init.js
+  when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
+
+- name: Initialize mongoc
+  command: "/usr/bin/mongo --port {{ mongoc_port }} -u {{ mongo_admin_username }} -p {{ mongo_admin_pass }} admin /tmp/mongoc_init.js"
+  when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
+  ignore_errors: yes

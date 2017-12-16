@@ -1,0 +1,20 @@
+#where to log
+systemLog:
+  destination: file
+  path: "/var/log/mongodb/mongos.log"
+  logAppend: true
+
+processManagement:
+  fork: true
+  pidFilePath: /var/run/mongodb/mongos.pid
+
+net:
+  port: {{ mongos_port }}
+  bindIp: 0.0.0.0
+
+security:
+  keyFile: {{ mongodb_datadir }}/keyfile
+
+sharding:
+   configDB: "mongoc/{{ configDB }}"
+

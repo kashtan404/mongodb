@@ -1,0 +1,28 @@
+[mongo_servers:children]
+rs1
+rs2
+
+[rs1]
+c00test01 ansible_host=<IP>
+c00test02 ansible_host=<IP>
+c00test03 ansible_host=<IP>
+c00test04 ansible_host=<IP>
+
+[rs2]
+c00test05 ansible_host=<IP>
+c00test06 ansible_host=<IP>
+c00test07 ansible_host=<IP>
+c00test08 ansible_host=<IP>
+
+[mongoc_servers]
+c00test09 ansible_host=<IP>
+c00test10 ansible_host=<IP>
+c00test11 ansible_host=<IP>
+c00test12 ansible_host=<IP>
+
+[mongos_servers]
+c00test00 ansible_host=<IP>
+
+[all:vars]
+ansible_user=<user>
+ansible_password=<password>
