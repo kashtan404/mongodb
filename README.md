@@ -9,17 +9,17 @@ gitlab -> gitlab-runner -> vagrant -> vsphere
 Так же, нужно ввести свои spec_name, template_name и прочее в Vagrantfile
 
 В ci 5 стадий:
-	1) деплой виртуалок
-		- vagrant up
-	2) dry-run плейбука
-		- ansible-playbook -i ./hosts ./mongo_cluster.yml -vvv  --syntax-check
-		- ansible-playbook -i ./hosts ./mongo_cluster_test.yml -vvv --syntax-check
-	3) деплой плейбука
-		- ansible-playbook -i ./hosts ./mongo_cluster.yml
-	4) накат тестовой бд (manual)
-		- ansible-playbook -i ./hosts ./mongo_cluster_test.yml
-	5) удаление виртуалок (manual)
-		vagrant destroy -f
+        1) деплой виртуалок
+            - vagrant up
+        2) dry-run плейбука
+            - ansible-playbook -i ./hosts ./mongo_cluster.yml -vvv  --syntax-check
+            - ansible-playbook -i ./hosts ./mongo_cluster_test.yml -vvv --syntax-check
+        3) деплой плейбука
+            - ansible-playbook -i ./hosts ./mongo_cluster.yml
+        4) накат тестовой бд (manual)
+            - ansible-playbook -i ./hosts ./mongo_cluster_test.yml
+        5) удаление виртуалок (manual)
+            vagrant destroy -f
 
 Почему не написано как универсальное решение, с развертыванием одной кнопкой в разных окружениях:
 У меня есть рабочее тестовое окружение, на котором стандартизирован деплой. Переделывать пайплайн для универсальности - пока времени нет.
@@ -27,11 +27,11 @@ gitlab -> gitlab-runner -> vagrant -> vsphere
 Переменные можно посмотреть и изменить в group_vars/
 
 Чтобы довести до продакшена:
-	1) Пересмотреть архитектуру. Скорее всего одного роутера маловато будет.
-	2) Добавить vault файл либо хранить логины/пароли/keyfile вне ролей.
-	3) Можно генератор inventory вроде [kubespray inventory builder](https://github.com/kubernetes-incubator/kubespray/blob/master/contrib/inventory_builder/inventory.py)
-	4) Заменить роль common. Написать роль аналогичную [этой](https://github.com/kubernetes-incubator/kubespray/tree/master/roles/kubernetes/preinstall) для предустановочной проверки (установлена ли mongodb, какие параметры и тп.), чтобы можно было многоразого запускать плейбук на одних и тех же машинах и ничего не отъезжало после повторго запуска.
-	5) Произвести тонкую настройку конфигов mongo (ничего пока сказать по этой теме не могу, это мой первый опыт общения с mongo).
+        1) Пересмотреть архитектуру. Скорее всего одного роутера маловато будет.
+        2) Добавить vault файл либо хранить логины/пароли/keyfile вне ролей.
+        3) Можно генератор inventory вроде [kubespray inventory builder](https://github.com/kubernetes-incubator/kubespray/blob/master/contrib/inventory_builder/inventory.py)
+        4) Заменить роль common. Написать роль аналогичную [этой](https://github.com/kubernetes-incubator/kubespray/tree/master/roles/kubernetes/preinstall) для предустановочной проверки (установлена ли mongodb, какие параметры и тп.), чтобы можно было многоразого запускать плейбук на одних и тех же машинах и ничего не отъезжало после повторго запуска.
+        5) Произвести тонкую настройку конфигов mongo (ничего пока сказать по этой теме не могу, это мой первый опыт общения с mongo).
 
 Немного описания на английскоим и примеры - под катом.
 
